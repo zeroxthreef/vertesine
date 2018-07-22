@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <title>Vertesine Register</title>
+  <head>
+    <meta name="description" content="Open source projects and software made for fun and utility" />
+    <meta name="DC.title" content="Vertesine Software About" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta charset="UTF-8" />
+    <link rel="icon" type="img/ico" href="favicon.ico">
+    <link href="/style.css" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+    %s
+    <div class="container0">
+      <br>
+      <div class="center">
+        <font size="5000" class="center" style="color: #ffffff"><u>Register</u></font>
+      </div>
+      <br>
+    </div>
+    <br>
+    <div class="seperator">
+    </div>
+    %s
+    <br>
+    <!-- >main block</!-->
+    <div class="container0">
+      <div class = "cooltext">
+        <div class="seperator"></div>
+        <div class="container1">
+          Create a vertesine account
+        </div>
+        <br>
+        <hr class="bigdivide">
+        <br>
+        <div class="container1">
+          %s
+          <form action="/register/" method="post" enctype="multipart/form-data">
+            %s
+            EMAIL<br>
+            <input type="text" name="email">
+            <br><br>
+            %s
+            USERNAME<br>
+            <input type="text" name="user">
+            <br><br>
+            %s
+            PASSWORD<br>
+            <input type="password" name="pass">
+            <br><br>
+            %s
+            RETYPE PASSWORD<br>
+            <input type="password" name="passv">
+            <div class="seperator"></div>
+            <input type="submit" value="REGISTER">
+          </form>
+        </div>
+        <div class="seperator"></div>
+      </div>
+    </div>
+  </body>
+  <br>
+  <div class="seperator">
+  </div>
+  <footer>
+    <div class="container0">
+      <br>
+      <div class = "cooltext">
+        <br>
+        <div class="container1">
+        Copyright 2017-%d 0x3F
+        </div>
+        <br>
+        <br>
+      </div>
+    </div>
+    <div class="seperator">
+    </div>
+  </footer>
+</html>

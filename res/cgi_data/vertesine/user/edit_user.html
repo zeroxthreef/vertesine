@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <title>Vertesine User</title>
+  <head>
+    <meta name="description" content="Open source projects and software made for fun and utility" />
+    <meta name="DC.title" content="Vertesine Software About" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta charset="UTF-8" />
+    <link rel="icon" type="img/ico" href="favicon.ico">
+    <link href="/style.css" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+    %s
+    <div class="container0">
+      <br>
+      <div class="center">
+        <font size="5000" class="center" style="color: #ffffff"><u>Edit User</u></font>
+      </div>
+      <br>
+    </div>
+    <br>
+    <div class="seperator">
+    </div>
+    %s
+    <br>
+    <!-- >main block</!-->
+    <div class="container0">
+      <div class = "cooltext">
+        <form action="/user/" method="post" enctype="multipart/form-data">
+
+        <div class="different_content0">
+          <img src="%s" alt="usericon"class="profile_page_av">
+          <br>
+          <div class="profile_text_container">
+            Update profile picture(4mb max): <input type="file" name="pic">
+          </div>
+          <div class="seperator"></div>
+          <div class="profile_text_container">
+            <div style="text-align: center;">
+              Edit Username(42 chars):
+              <font size="20pt"><input type="text" name="user" value="%s"></font>
+            </div>
+            <hr class="bigdivide">
+            %s
+            <br><br>
+            User since: %s
+
+          </div>
+        </div>
+
+        <div class="different_content1">
+          <div class="profile_text_container">
+            <div style="text-align: center;">
+              <font size="20pt">Profile Info</font>
+              %s
+            </div>
+            <hr class="bigdivide">
+            <div class="seperator"></div>
+            Bio:<br>
+            <textarea name="bio" cols="50" rows="10">%s</textarea>
+            <div class="seperator_small"></div>
+            Website:
+            <input type="text" name="web" value="%s">
+            <div class="seperator_small"></div>
+            Twitter:
+            <input type="text" name="twi" value="%s">
+            <div class="seperator_small"></div>
+            YouTube Channel:
+            <input type="text" name="you" value="%s">
+            <div class="seperator_small"></div>
+            <!-- >
+            Birthday:
+            <input type="text" name="bio" value="%s">
+            <div class="seperator_small"></div>
+            </!-->
+
+            <input type="submit" value="UPDATE">
+          </div>
+        </div>
+
+
+        <div class="seperator"></div>
+        </form>
+      </div>
+
+    </div>
+  </body>
+  <br>
+  <div class="seperator">
+  </div>
+  <footer>
+    <div class="container0">
+      <br>
+      <div class = "cooltext">
+        <br>
+        <div class="container1">
+        Copyright 2017-%d 0x3F
+        </div>
+        <br>
+        <br>
+      </div>
+    </div>
+    <div class="seperator">
+    </div>
+  </footer>
+</html>

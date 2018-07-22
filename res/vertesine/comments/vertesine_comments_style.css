@@ -1,0 +1,21 @@
+.vertesine_comment_body {
+  overflow: hidden;
+  margin: 5%;
+  border: 3px solid black;
+  background-color: #a6a6a6;
+  width: 90%;
+  border-radius: 4px;
+}
+
+.vertesine_comment_comment_container { #goes inside the other one. Im imagining a dark grey post box that has darker comments contained in this. Imagine a screen, but top heavy with the bezels
+  overflow: hidden;
+  margin: 2%;
+  border: 3px solid black;
+  background-color: #D6D6D6;
+  width: 100%;
+  border-radius: 4px;
+}
+
+.vertesine_comment_top_cintainer {
+  padding: 2%;
+}
