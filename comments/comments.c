@@ -26,6 +26,18 @@ short vert_shutdown = 0;
 
 
 
+char *get_comment_data(char *page)
+{
+  char *final_str = NULL;
+  unqlite_kv_cursor *cur;
+  unqlite_int64 v_size;
+  char *key_value, *value_value;
+  int k_size, can_followthrough = 0;
+
+
+
+  return final_str;
+}
 
 void respond_nothing(struct kreq *req)
 {
@@ -50,13 +62,6 @@ void respond_home(struct kreq *req)
 int respond_post(struct kreq *req)
 {
   char *final_str = NULL;
-  unqlite_kv_cursor *cur;
-  unqlite_int64 v_size;
-  char *key_value, *value_value;
-  int k_size, can_followthrough = 0;
-
-
-
 
 
   if(req->method == KMETHOD_POST)
@@ -67,69 +72,23 @@ int respond_post(struct kreq *req)
 
     if(req->fieldsz == 1)
     {
+      json_t *post_json = json_loads(req->fields[0].val, 0, NULL);
 
-
-      fprintf(stderr, "json: %s\n", req->fields[0].val);
-
-      /*
-      if(unqlite_kv_cursor_init(com_db, &cur) != UNQLITE_OK)
+      if(post_json != NULL && req->fields[0].valsz != 0 && req->fields[0].valsz <= 600)
       {
-        fprintf(stderr, "cant allocate a cursor\n");
-        return 1;
+        fprintf(stderr, "json: %s\n", json_dumps(post_json, JSON_INDENT(2)));
+
+
+        /* place */
+
+        vert_asprintf(&final_str, "success");
       }
+      else
+        vert_asprintf(&final_str, "invalid json or incorrect data");
 
-      /* search for the login key match */
-      /*
-      unqlite_kv_cursor_first_entry(cur);
-
-      while(unqlite_kv_cursor_valid_entry(cur))
-      {
-        unqlite_kv_cursor_key(cur, NULL, &k_size);/* TODO get the size then allocate then get the key, and repeat for the value *//*
-        key_value = malloc(k_size + 1);
-        unqlite_kv_cursor_key(cur, key_value, &k_size);
-        key_value[k_size] = 0x00;
-
-        unqlite_kv_cursor_data(cur, NULL, &v_size);
-        value_value = malloc(v_size + 1);
-        unqlite_kv_cursor_data(cur, value_value, &v_size);
-        value_value[v_size] = 0x00;
-
-        k_size = 0;
-        v_size = 0;
-
-
-
-        if(strcmp(req->fields[0].val, key_value) == 0)
-        {
-          free(key_value);
-          free(value_value);
-
-
-          if(unqlite_kv_store(com_db, req->fields[0].val, -1, STRING HERE, strlen(STRING HERE) + 1) != UNQLITE_OK)
-          {
-            unqlite_rollback(com_db);
-            fprintf(stderr, "couldn't add a value\n");
-
-            return 1;
-          }
-
-
-        }
-        else
-        {
-          unqlite_kv_cursor_next_entry(cur);
-
-
-          free(value_value);
-          free(key_value);
-        }
-
-      }
-      */
-      vert_asprintf(&final_str, "<html>oof</html>");
     }
     else
-      vert_asprintf(&final_str, "<html>bad POST</html>");
+      vert_asprintf(&final_str, "bad POST");
   }
   else
   {

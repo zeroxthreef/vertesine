@@ -13,7 +13,7 @@ function(build_home)
 
   add_executable(HOME_BINARY "${PROJECT_SOURCE_DIR}/home/home.c" "${PROJECT_SOURCE_DIR}/util.c" "${PROJECT_SOURCE_DIR}/home/user.c" "${PROJECT_SOURCE_DIR}/lib/snowflake/snowflake.c" "${PROJECT_SOURCE_DIR}/home/manage.c")
 
-  target_link_libraries(HOME_BINARY kcgi z pthread unqlite sodium jansson curl b64 gd)
+  target_link_libraries(HOME_BINARY kcgi z pthread unqlite :libsodium.a jansson curl b64 gd)
 
   install(TARGETS HOME_BINARY RUNTIME DESTINATION /var/www/cgi_data/vertesine)
 endfunction()

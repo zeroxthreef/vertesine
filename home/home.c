@@ -402,7 +402,7 @@ void respond_user(struct kreq *req)
             vert_asprintf(&user_priv, "<font color=\"green\">Admin</font>");
           break;
           case 3:
-            vert_asprintf(&user_priv, "<i>Owner or something I dunno</i>");
+            vert_asprintf(&user_priv, "<font color=\"red\">Admin 2.0001</font>");
           break;
         }
 
@@ -458,7 +458,7 @@ void respond_user(struct kreq *req)
                 vert_asprintf(&user_priv, "<font color=\"green\">Admin</font>");
               break;
               case 3:
-                vert_asprintf(&user_priv, "<i>Owner or something I dunno</i>");
+                vert_asprintf(&user_priv, "<font color=\"red\">Admin 2.0001</font>");
               break;
             }
 
@@ -509,7 +509,7 @@ void respond_user(struct kreq *req)
             vert_asprintf(&user_priv, "<font color=\"green\">Admin</font>");
           break;
           case 3:
-            vert_asprintf(&user_priv, "<i>Owner or something I dunno</i>");
+            vert_asprintf(&user_priv, "<font color=\"red\">Admin 2.0001</font>");
           break;
         }
 
@@ -736,7 +736,9 @@ void respond_login(struct kreq *req)
     khttp_head(req, kresps[KRESP_CACHE_CONTROL], "no-cache");
     khttp_head(req, kresps[KRESP_EXPIRES], "Tue, 01 Jun 1999 19:58:02 GMT");
     khttp_head(req, kresps[KRESP_LOCATION], "/");
-    khttp_head(req, kresps[KRESP_SET_COOKIE], "login_token=%s; Expires=%s; Secure; HttpOnly; Path=/", token, kutil_epoch2str(time(NULL) + 60 * 60 * 24 * 7, epoch_str, sizeof(epoch_str)));
+    /* TODO fix this and change it back after this */
+    //khttp_head(req, kresps[KRESP_SET_COOKIE], "login_token=%s; Expires=%s; Secure; HttpOnly; Path=/", token, kutil_epoch2str(time(NULL) + 60 * 60 * 24 * 7, epoch_str, sizeof(epoch_str)));
+    khttp_head(req, kresps[KRESP_SET_COOKIE], "login_token=%s; Expires=%s; HttpOnly; Path=/", token, kutil_epoch2str(time(NULL) + 60 * 60 * 24 * 7, epoch_str, sizeof(epoch_str)));
     /* fprintf(stderr, "setting cookie \"login_token=%s; Expires=%s; Secure; HttpOnly; Path=/\"", token, kutil_epoch2str(time(NULL) + 60 * 60 * 24 * 7, epoch_str, sizeof(epoch_str))); */
     free(token);
   }
