@@ -53,4 +53,8 @@ int vert_contains_html(char *string);
 
 int vert_parse_markdown(char *string, char **output);
 
+char *vert_create_page_list(unsigned int current, unsigned int max, char *query_root);
+
+unsigned long vert_get_db_keyv_num(void *db);
+
 #endif

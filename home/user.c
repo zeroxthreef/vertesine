@@ -65,6 +65,7 @@ int vert_create_user(char *username, char *email, char *password_hash, char *reg
     {
       free(key_value);
       free(value_value);
+      unqlite_kv_cursor_release(acc_db, cur);
       fprintf(stderr, "jansson gave up\n");
       return 1;
     }
@@ -78,6 +79,7 @@ int vert_create_user(char *username, char *email, char *password_hash, char *reg
     {
       free(key_value);
       free(value_value);
+      unqlite_kv_cursor_release(acc_db, cur);
       json_decref(user);
       fprintf(stderr, "jansson couldnt find the strings. Pretty bad error\n");
       return 1;
@@ -89,6 +91,7 @@ int vert_create_user(char *username, char *email, char *password_hash, char *reg
     {
       //free(temp_email);
       //free(temp_username);
+      unqlite_kv_cursor_release(acc_db, cur);
       json_decref(user);
       free(key_value);
       free(value_value);
@@ -99,6 +102,7 @@ int vert_create_user(char *username, char *email, char *password_hash, char *reg
     {
       //free(temp_email);
       //free(temp_username);
+      unqlite_kv_cursor_release(acc_db, cur);
       json_decref(user);
       free(key_value);
       free(value_value);
@@ -235,6 +239,7 @@ int vert_login_user(char *username, char *pass_hash, char **token)
     {
       free(key_value);
       free(value_value);
+      unqlite_kv_cursor_release(acc_db, cur);
       fprintf(stderr, "jansson gave up\n");
       return 1; /* db error */
     }
@@ -245,6 +250,7 @@ int vert_login_user(char *username, char *pass_hash, char **token)
       {
         free(value_value);
         free(key_value);
+        unqlite_kv_cursor_release(acc_db, cur);
         json_decref(user);
 
         return 3; /* login unsuccessful */
@@ -256,6 +262,7 @@ int vert_login_user(char *username, char *pass_hash, char **token)
       free(value_value);
       free(key_value);
       json_decref(user);
+      unqlite_kv_cursor_release(acc_db, cur);
 
       return 2; /* login successful */
     }
@@ -266,6 +273,8 @@ int vert_login_user(char *username, char *pass_hash, char **token)
     free(key_value);
     json_decref(user);
   }
+
+  unqlite_kv_cursor_release(acc_db, cur);
 
 
   return 0; /* couldnt find user */
@@ -319,6 +328,7 @@ int vert_edit_user(char *username, char *user_id, user_t *set_user)
     {
       free(key_value);
       free(value_value);
+      unqlite_kv_cursor_release(acc_db, cur);
       fprintf(stderr, "jansson gave up\n");
       return 1; /* db error */
     }
@@ -378,6 +388,7 @@ int vert_edit_user(char *username, char *user_id, user_t *set_user)
         unqlite_rollback(acc_db);
         free(key_value);
         free(value_value);
+        unqlite_kv_cursor_release(acc_db, cur);
         fprintf(stderr, "couldn't add a value\n");
         json_decref(user);
 
@@ -390,6 +401,7 @@ int vert_edit_user(char *username, char *user_id, user_t *set_user)
 
       fprintf(stderr, "updating user %s\n", username);
       unqlite_commit(acc_db);
+      unqlite_kv_cursor_release(acc_db, cur);
       free(key_value);
       free(value_value);
       json_decref(user);
@@ -403,6 +415,8 @@ int vert_edit_user(char *username, char *user_id, user_t *set_user)
     free(key_value);
     json_decref(user);
   }
+
+  unqlite_kv_cursor_release(acc_db, cur);
 
   return 0;
 }
@@ -451,6 +465,7 @@ int vert_view_user(user_t **user_data, char *user_id, char *username)
       {
         free(key_value);
         free(value_value);
+        unqlite_kv_cursor_release(acc_db, cur);
         fprintf(stderr, "jansson gave up %s %s %d %d\n", jerror.text, jerror.source, jerror.line, jerror.column);
         return 1; /* db error */
       }
@@ -514,6 +529,7 @@ int vert_view_user(user_t **user_data, char *user_id, char *username)
 
         free(key_value);
         json_decref(user);
+        unqlite_kv_cursor_release(acc_db, cur);
         return 2;
       }
 
@@ -525,6 +541,7 @@ int vert_view_user(user_t **user_data, char *user_id, char *username)
       json_decref(user);
     }
 
+    unqlite_kv_cursor_release(acc_db, cur);
 
   return 0;
 }
@@ -574,6 +591,7 @@ int vert_is_user_logged_in(struct kreq *req, user_t **user_data)
     {
       free(key_value);
       free(value_value);
+      unqlite_kv_cursor_release(acc_db, cur);
       fprintf(stderr, "jansson gave up\n");
       return 1; /* db error */
     }
@@ -596,6 +614,7 @@ int vert_is_user_logged_in(struct kreq *req, user_t **user_data)
         fprintf(stderr, "allocation error\n");
         free(key_value);
         json_decref(user);
+        unqlite_kv_cursor_release(acc_db, cur);
         return 1;
       }
 
@@ -636,7 +655,7 @@ int vert_is_user_logged_in(struct kreq *req, user_t **user_data)
   }
 
 
-
+  unqlite_kv_cursor_release(acc_db, cur);
   //free(value_value);
   //free(key_value);
   //if(req->cookies[0].key)

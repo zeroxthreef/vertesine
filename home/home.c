@@ -29,8 +29,8 @@ pthread_t file_update_thread;
 const char *manage_key = NULL;
 
 /* cached files */
-char *home_html, *navbar_html, *notification_html, *notification_text, *error_template, *login_html, *register_html, *about_html, *login_html, *register_html, *confirm_logout_html, *user_html, *edit_user, *manage_html;
-unsigned long home_html_len, navbar_html_len, notification_html_len, notification_text_len, error_template_len, login_html_len, register_html_len, about_html_len, login_html_len, register_html_len, confirm_logout_html_len, user_html_len, edit_user_len, manage_html_len;
+char *home_html, *navbar_html, *notification_html, *notification_text, *error_template, *login_html, *register_html, *about_html, *login_html, *register_html, *confirm_logout_html, *user_html, *edit_user, *manage_html, *entries_html;
+unsigned long home_html_len, navbar_html_len, notification_html_len, notification_text_len, error_template_len, login_html_len, register_html_len, about_html_len, login_html_len, register_html_len, confirm_logout_html_len, user_html_len, edit_user_len, manage_html_len, entries_html_len;
 
 int fd[FOLDER_COUNT], fwd[FOLDER_COUNT];
 
@@ -84,6 +84,7 @@ short init()
   user_html = vert_read_file(CGI_ROOT "user/user.html", &user_html_len);
   edit_user = vert_read_file(CGI_ROOT "user/edit_user.html", &edit_user_len);
   manage_html = vert_read_file(CGI_ROOT "manage.html", &manage_html_len);
+  entries_html = vert_read_file(CGI_ROOT "entries/entries.html", &entries_html_len);
 
 
   for(i = 0; i < FOLDER_COUNT; i++)
@@ -100,6 +101,8 @@ short init()
   }
 
   unqlite_commit(acc_db);
+  unqlite_commit(post_db);
+
 
   if(sodium_init() < 0)
   {
@@ -132,6 +135,77 @@ void respond_debug(struct kreq *req)
   khttp_puts(req, debug);
 
   free(debug);
+}
+
+void respond_entries(struct kreq *req)
+{
+  char *return_page = NULL, *notification_text_return = NULL, *final_navbar = NULL, *final_userhtml = NULL, *page_numbers = NULL;
+  time_t time_date_time = time(NULL);
+  struct tm time_date = *localtime(&time_date_time);
+  user_t *user = NULL;
+
+  khttp_head(req, kresps[KRESP_STATUS], "%s", khttps[KHTTP_200]);
+  khttp_head(req, kresps[KRESP_CONTENT_TYPE], "%s", kmimetypes[KMIME_TEXT_HTML]);
+  khttp_head(req, kresps[KRESP_CACHE_CONTROL], "no-cache");
+  khttp_head(req, kresps[KRESP_EXPIRES], "Tue, 01 Jun 1999 19:58:02 GMT");
+  khttp_body(req);
+
+
+  if(vert_is_user_logged_in(req, &user) == 2)
+  {
+
+    vert_asprintf(&final_userhtml, "<li class=\"navbarli\" style=\"float: right;\"><a class=\"navbarli\" href=\"/user/?u=%s\"><div style=\"usernavbar\"><img src=\"%s\" alt=\"usericon\" style=\"width:14px;height:14px;margin:0px;margin-right:5px;border-style:solid;border-width:1px;float:left;\">%s</div></a></li>", kutil_urlencode(user->username), user->avatar, user->username);
+    if(user->permissions == 3)
+      vert_asprintf(&final_navbar, navbar_html, "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/login/\">LOGOUT</a></li>", "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/manage/\">MANAGEMENT PANEL</a></li>", final_userhtml);
+    else
+      vert_asprintf(&final_navbar, navbar_html, "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/login/\">LOGOUT</a></li>", "", final_userhtml);
+
+    free(final_userhtml);
+  }
+  else
+  {
+    vert_asprintf(&final_navbar, navbar_html, "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/login/\">LOGIN</a></li>", "", "");
+
+  }
+  vert_asprintf(&notification_text_return, notification_html, notification_text);
+
+
+
+
+  page_numbers = vert_create_page_list(1 - 1, 1, "/entries/");
+
+
+
+
+  if(user != NULL)
+  {
+    if(user->permissions == 3)
+      vert_asprintf(&return_page, entries_html, notification_text_return, final_navbar, page_numbers, "<div class=\"entries_pages_create\"> \
+        Make new post<br><br> \
+        <form action=\"/entries/\" method=\"post\" enctype=\"multipart/form-data\"> \
+          Title: \
+          <input type=\"text\" name=\"title\"> \
+          <input type=\"submit\" value=\"CREATE\"> \
+        </form> \
+      </div> \
+      <div class=\"seperator\"></div>", time_date.tm_year + 1900);
+    else
+      vert_asprintf(&return_page, entries_html, notification_text_return, final_navbar, page_numbers, "", time_date.tm_year + 1900);
+  }
+  else
+  {
+    vert_asprintf(&return_page, entries_html, notification_text_return, final_navbar, page_numbers, "", time_date.tm_year + 1900);
+  }
+
+
+  khttp_puts(req, return_page);
+
+
+  vert_clean_user(user);
+  free(page_numbers);
+  free(final_navbar);
+  free(return_page);
+  free(notification_text_return);
 }
 
 void respond_confirmlogout(struct kreq *req)
@@ -736,9 +810,7 @@ void respond_login(struct kreq *req)
     khttp_head(req, kresps[KRESP_CACHE_CONTROL], "no-cache");
     khttp_head(req, kresps[KRESP_EXPIRES], "Tue, 01 Jun 1999 19:58:02 GMT");
     khttp_head(req, kresps[KRESP_LOCATION], "/");
-    /* TODO fix this and change it back after this */
-    //khttp_head(req, kresps[KRESP_SET_COOKIE], "login_token=%s; Expires=%s; Secure; HttpOnly; Path=/", token, kutil_epoch2str(time(NULL) + 60 * 60 * 24 * 7, epoch_str, sizeof(epoch_str)));
-    khttp_head(req, kresps[KRESP_SET_COOKIE], "login_token=%s; Expires=%s; HttpOnly; Path=/", token, kutil_epoch2str(time(NULL) + 60 * 60 * 24 * 7, epoch_str, sizeof(epoch_str)));
+    khttp_head(req, kresps[KRESP_SET_COOKIE], "login_token=%s; Expires=%s; Secure; HttpOnly; Path=/", token, kutil_epoch2str(time(NULL) + 60 * 60 * 24 * 7, epoch_str, sizeof(epoch_str)));
     /* fprintf(stderr, "setting cookie \"login_token=%s; Expires=%s; Secure; HttpOnly; Path=/\"", token, kutil_epoch2str(time(NULL) + 60 * 60 * 24 * 7, epoch_str, sizeof(epoch_str))); */
     free(token);
   }
@@ -930,6 +1002,11 @@ void update_file(char *path)
     free(manage_html);
     manage_html = vert_read_file(CGI_ROOT "manage.html", &manage_html_len);
   }
+  else if(strcmp("entries.html", path) == 0)
+  {
+    free(entries_html);
+    entries_html = vert_read_file(CGI_ROOT "entries/entries.html", &entries_html_len);
+  }
 
 }
 
@@ -965,6 +1042,8 @@ void route()
       respond_user(&req);
     else if(strncmp(req.pagename, "manage", strlen("manage")) == 0)
       respond_manage(&req);
+    else if(strncmp(req.pagename, "entries", strlen("entries")) == 0)
+      respond_entries(&req);
     else /* last resort if it doesn't find anything */
       respond_debug(&req);
     /* ============= */
@@ -999,6 +1078,6 @@ int main(int argc, char **argv)
   if(destroy())
     fprintf(stderr, "couldn't cleanly exit\n");
   else
-    printf("cleanly exitted\n");
+    fprintf(stderr, "cleanly exitted\n");
   return 0;
 }

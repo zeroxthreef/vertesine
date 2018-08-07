@@ -355,6 +355,62 @@ int vert_parse_markdown(char *string, char **output)
   return 0;
 }
 
+char *vert_create_page_list(unsigned int current, unsigned int max, char *query_root)///entries/
+{
+  char *final = NULL;
+  char *html = "<div class=\"entries_pages_contrainer\">| \
+  <div style=\"float: left; display: block; margin-right: 1%%;\">Page|</div> \
+  %s \
+  </div> \
+  <div class=\"seperator\"></div>";
+  char *number_html = "<a href=\"%s?p=%lu\"><div class=\"entries_pages_contrainer_numbers_%sactive\">%lu</div></a>";
+  char *temp_numlist = NULL, *temp_number = NULL;
+  unsigned long i;
+
+
+  for(i = 0; i < max; i++)
+  {
+    vert_asprintf(&temp_number, number_html, query_root, i + 1, (i == current) ? "" : "in", i + 1);
+    vert_asprintf(&temp_numlist, "%s\n%s", i ? temp_numlist : "", temp_number);
+
+  }
+
+  vert_asprintf(&final, html, temp_numlist);
+
+
+  free(temp_number);
+  free(temp_numlist);
+
+  return final;
+}
+
+unsigned long vert_get_db_keyv_num(void *db)
+{
+  unqlite *temp_db = (unqlite *)db;
+  unsigned long count = 0;
+  unqlite_kv_cursor *cur;
+
+
+  if(unqlite_kv_cursor_init(temp_db, &cur) != UNQLITE_OK)
+  {
+    fprintf(stderr, "cant allocate a cursor\n");
+    return 1;
+  }
+
+  unqlite_kv_cursor_first_entry(cur);
+
+  while(unqlite_kv_cursor_valid_entry(cur))
+  {
+    unqlite_kv_cursor_next_entry(cur);
+    count++;
+  }
+
+  unqlite_kv_cursor_release(temp_db, cur);
+
+
+  return count;
+}
+
 int vert_send_email(char *address, char *subject, char *email_sender, char *email_message) /* TODO do this later */
 {
   CURL *curl;
