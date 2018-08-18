@@ -1,12 +1,14 @@
 /* #include "home.h" */
 #include "../util.h"
 #include "user.h"
+#include "post.h"
 
 #include "../lib/snowflake/snowflake.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include <sys/types.h>
 #include <stdarg.h>
@@ -17,6 +19,7 @@
 #include <sodium.h>
 #include <pthread.h>
 #include <time.h>
+#include <jansson.h>
 
 #include "home.h"
 
@@ -137,12 +140,41 @@ void respond_debug(struct kreq *req)
   free(debug);
 }
 
+int replace_normal_vertesine_elements(struct kreq *req, char **buffer)
+{
+
+
+
+  return 0;
+}
+
 void respond_entries(struct kreq *req)
 {
-  char *return_page = NULL, *notification_text_return = NULL, *final_navbar = NULL, *final_userhtml = NULL, *page_numbers = NULL;
+  char *return_page = NULL, *notification_text_return = NULL, *final_navbar = NULL, *final_userhtml = NULL, *page_numbers = NULL, *entries_list = NULL, *temp_entry = NULL;
+  char epoch_str[64];
   time_t time_date_time = time(NULL);
+  unsigned long entries = 0, current_page = 0;
   struct tm time_date = *localtime(&time_date_time);
   user_t *user = NULL;
+  unqlite_int64 v_size;
+  char *key_value, *value_value;
+  int k_size;
+  unqlite_kv_cursor *cur;
+  char *entry_list_source = "<a href=\"/entries/%s/\"> \
+  <div class=\"different_content4\"> \
+    <div class=\"entries_preview_header\"> \
+      %s \
+    </div> \
+    <div class=\"entries_preview_content\"> \
+      %s \
+    </div> \
+    <div class=\"entries_preview_footer\"> \
+      POSTED: %s Click to read more \
+    </div> \
+  </div> \
+  </a> \
+  <div class=\"seperator\"></div>";
+
 
   khttp_head(req, kresps[KRESP_STATUS], "%s", khttps[KHTTP_200]);
   khttp_head(req, kresps[KRESP_CONTENT_TYPE], "%s", kmimetypes[KMIME_TEXT_HTML]);
@@ -150,52 +182,214 @@ void respond_entries(struct kreq *req)
   khttp_head(req, kresps[KRESP_EXPIRES], "Tue, 01 Jun 1999 19:58:02 GMT");
   khttp_body(req);
 
+  /* create the list of entries and do the calculation for pages */
 
-  if(vert_is_user_logged_in(req, &user) == 2)
+  if((entries = vert_get_db_keyv_num((void *)post_db)) > 0)
   {
+    if(unqlite_kv_cursor_init(post_db, &cur) != UNQLITE_OK)
+    {
+      fprintf(stderr, "cant allocate a cursor\n");
+      vert_asprintf(&entries_list, "db uhoh");
 
-    vert_asprintf(&final_userhtml, "<li class=\"navbarli\" style=\"float: right;\"><a class=\"navbarli\" href=\"/user/?u=%s\"><div style=\"usernavbar\"><img src=\"%s\" alt=\"usericon\" style=\"width:14px;height:14px;margin:0px;margin-right:5px;border-style:solid;border-width:1px;float:left;\">%s</div></a></li>", kutil_urlencode(user->username), user->avatar, user->username);
-    if(user->permissions == 3)
-      vert_asprintf(&final_navbar, navbar_html, "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/login/\">LOGOUT</a></li>", "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/manage/\">MANAGEMENT PANEL</a></li>", final_userhtml);
+    }
     else
-      vert_asprintf(&final_navbar, navbar_html, "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/login/\">LOGOUT</a></li>", "", final_userhtml);
+    {
+      unqlite_kv_cursor_first_entry(cur);
 
-    free(final_userhtml);
+      while(unqlite_kv_cursor_valid_entry(cur))
+      {
+        unqlite_kv_cursor_key(cur, NULL, &k_size);/* TODO get the size then allocate then get the key, and repeat for the value */
+        key_value = calloc(1, k_size + 1);
+        unqlite_kv_cursor_key(cur, key_value, &k_size);
+        key_value[k_size] = 0x00;
+
+        unqlite_kv_cursor_data(cur, NULL, &v_size);
+        value_value = calloc(1, v_size + 1);
+        unqlite_kv_cursor_data(cur, value_value, &v_size);
+        value_value[v_size] = 0x00;
+
+        vert_filter_jansson_breakers(value_value, v_size);
+
+        k_size = 0;
+        v_size = 0;
+
+
+
+        json_t *post_json = json_loads(value_value, 0, NULL);
+        if(post_json == NULL)
+        {
+          free(key_value);
+          free(value_value);
+          unqlite_kv_cursor_release(post_db, cur);
+          fprintf(stderr, "jansson gave up\n");
+          vert_asprintf(&entries_list, "parse uhoh");
+          break;
+        }
+
+
+        char *temp_body = json_string_value(json_object_get(post_json, "body"));
+        if(strlen(temp_body) > 20)
+        {
+          temp_body[20] = 0x00;
+          temp_body[19] = '.';
+          temp_body[18] = '.';
+          temp_body[17] = '.';
+        }
+
+        vert_asprintf(&temp_entry, entry_list_source, json_string_value(json_object_get(post_json, "title")), json_string_value(json_object_get(post_json, "title")), strlen(temp_body) ? temp_body : "empty entry", kutil_epoch2str(json_integer_value(json_object_get(post_json, "created")), epoch_str, 64));
+        if(entries_list == NULL)
+          vert_asprintf(&entries_list, "%s", temp_entry);
+        else
+          vert_asprintf(&entries_list, "%s%s", entries_list, temp_entry);
+
+
+        unqlite_kv_cursor_next_entry(cur);
+
+        free(value_value);
+        free(key_value);
+        json_decref(post_json);
+      }
+
+      unqlite_kv_cursor_release(post_db, cur);
+
+      free(temp_entry);
+    }
+
+  }
+  else
+    vert_asprintf(&entries_list, "No entries");
+
+
+  page_numbers = vert_create_page_list(1 - 1, (unsigned long)ceil((double)entries / 8.0), "/entries/");
+  /* fprintf(stderr, "yeah %lu %lu\n", (unsigned long)ceil((double)entries / 8.0), entries); */
+
+
+
+
+
+  /* respond appropriately */
+
+
+  if(req->method == KMETHOD_POST)
+  {
+    if(vert_is_user_logged_in(req, &user) == 2)
+    {
+
+      vert_asprintf(&final_userhtml, "<li class=\"navbarli\" style=\"float: right;\"><a class=\"navbarli\" href=\"/user/?u=%s\"><div style=\"usernavbar\"><img src=\"%s\" alt=\"usericon\" style=\"width:14px;height:14px;margin:0px;margin-right:5px;border-style:solid;border-width:1px;float:left;\">%s</div></a></li>", kutil_urlencode(user->username), user->avatar, user->username);
+      if(user->permissions == 3)
+        vert_asprintf(&final_navbar, navbar_html, "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/login/\">LOGOUT</a></li>", "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/manage/\">MANAGEMENT PANEL</a></li>", final_userhtml);
+      else
+        vert_asprintf(&final_navbar, navbar_html, "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/login/\">LOGOUT</a></li>", "", final_userhtml);
+
+      free(final_userhtml);
+    }
+    else
+    {
+      vert_asprintf(&final_navbar, navbar_html, "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/login/\">LOGIN</a></li>", "", "");
+
+    }
+    vert_asprintf(&notification_text_return, notification_html, notification_text);
+
+
+
+
+
+    if(user != NULL)
+    {
+      if(user->permissions == 3)
+      {
+        if(req->fieldsz == 1)
+        {
+          if(vert_create_post(0, req->fields[0].val, NULL, user) == 0)
+          {
+            vert_asprintf(&return_page, entries_html, notification_text_return, final_navbar, page_numbers, "<br><font color=\"green\">Created entry</font><br>", "<div class=\"entries_pages_create\"> \
+              Make new post<br><br> \
+              <form action=\"/entries/\" method=\"post\" enctype=\"multipart/form-data\"> \
+                Title: \
+                <input type=\"text\" name=\"title\"> \
+                <input type=\"submit\" value=\"CREATE\"> \
+              </form> \
+            </div> \
+            <div class=\"seperator\"></div>", entries_list, time_date.tm_year + 1900);
+          }
+          else
+          {
+            vert_asprintf(&return_page, entries_html, notification_text_return, final_navbar, page_numbers, "<br><font color=\"red\">Title already exists or db error</font><br>", "<div class=\"entries_pages_create\"> \
+              Make new post<br><br> \
+              <form action=\"/entries/\" method=\"post\" enctype=\"multipart/form-data\"> \
+                Title: \
+                <input type=\"text\" name=\"title\"> \
+                <input type=\"submit\" value=\"CREATE\"> \
+              </form> \
+            </div> \
+            <div class=\"seperator\"></div>", entries_list, time_date.tm_year + 1900);
+          }
+
+        }
+        else
+          vert_asprintf(&return_page, entries_html, notification_text_return, final_navbar, page_numbers, "", "<div class=\"entries_pages_create\"> \
+            Make new post<br><br> \
+            <form action=\"/entries/\" method=\"post\" enctype=\"multipart/form-data\"> \
+              Title: \
+              <input type=\"text\" name=\"title\"> \
+              <input type=\"submit\" value=\"CREATE\"> \
+            </form> \
+          </div> \
+          <div class=\"seperator\"></div>", entries_list, time_date.tm_year + 1900);
+      }
+      else
+        vert_asprintf(&return_page, entries_html, notification_text_return, final_navbar, page_numbers, "", "", entries_list, time_date.tm_year + 1900);
+    }
+    else
+    {
+      vert_asprintf(&return_page, entries_html, notification_text_return, final_navbar, page_numbers, "", "", entries_list, time_date.tm_year + 1900);
+    }
   }
   else
   {
-    vert_asprintf(&final_navbar, navbar_html, "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/login/\">LOGIN</a></li>", "", "");
+    if(vert_is_user_logged_in(req, &user) == 2)
+    {
 
-  }
-  vert_asprintf(&notification_text_return, notification_html, notification_text);
+      vert_asprintf(&final_userhtml, "<li class=\"navbarli\" style=\"float: right;\"><a class=\"navbarli\" href=\"/user/?u=%s\"><div style=\"usernavbar\"><img src=\"%s\" alt=\"usericon\" style=\"width:14px;height:14px;margin:0px;margin-right:5px;border-style:solid;border-width:1px;float:left;\">%s</div></a></li>", kutil_urlencode(user->username), user->avatar, user->username);
+      if(user->permissions == 3)
+        vert_asprintf(&final_navbar, navbar_html, "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/login/\">LOGOUT</a></li>", "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/manage/\">MANAGEMENT PANEL</a></li>", final_userhtml);
+      else
+        vert_asprintf(&final_navbar, navbar_html, "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/login/\">LOGOUT</a></li>", "", final_userhtml);
 
-
-
-
-  page_numbers = vert_create_page_list(1 - 1, 1, "/entries/");
-
-
-
-
-  if(user != NULL)
-  {
-    if(user->permissions == 3)
-      vert_asprintf(&return_page, entries_html, notification_text_return, final_navbar, page_numbers, "<div class=\"entries_pages_create\"> \
-        Make new post<br><br> \
-        <form action=\"/entries/\" method=\"post\" enctype=\"multipart/form-data\"> \
-          Title: \
-          <input type=\"text\" name=\"title\"> \
-          <input type=\"submit\" value=\"CREATE\"> \
-        </form> \
-      </div> \
-      <div class=\"seperator\"></div>", time_date.tm_year + 1900);
+      free(final_userhtml);
+    }
     else
-      vert_asprintf(&return_page, entries_html, notification_text_return, final_navbar, page_numbers, "", time_date.tm_year + 1900);
+    {
+      vert_asprintf(&final_navbar, navbar_html, "<li class=\"navbarli\"><a class=\"navbarli\" href=\"/login/\">LOGIN</a></li>", "", "");
+
+    }
+    vert_asprintf(&notification_text_return, notification_html, notification_text);
+
+
+
+
+
+    if(user != NULL)
+    {
+      if(user->permissions == 3)
+        vert_asprintf(&return_page, entries_html, notification_text_return, final_navbar, page_numbers, "", "<div class=\"entries_pages_create\"> \
+          Make new post<br><br> \
+          <form action=\"/entries/\" method=\"post\" enctype=\"multipart/form-data\"> \
+            Title: \
+            <input type=\"text\" name=\"title\"> \
+            <input type=\"submit\" value=\"CREATE\"> \
+          </form> \
+        </div> \
+        <div class=\"seperator\"></div>", entries_list, time_date.tm_year + 1900);
+      else
+        vert_asprintf(&return_page, entries_html, notification_text_return, final_navbar, page_numbers, "", "", entries_list, time_date.tm_year + 1900);
+    }
+    else
+    {
+      vert_asprintf(&return_page, entries_html, notification_text_return, final_navbar, page_numbers, "", "", entries_list, time_date.tm_year + 1900);
+    }
   }
-  else
-  {
-    vert_asprintf(&return_page, entries_html, notification_text_return, final_navbar, page_numbers, "", time_date.tm_year + 1900);
-  }
+
 
 
   khttp_puts(req, return_page);
@@ -205,6 +399,7 @@ void respond_entries(struct kreq *req)
   free(page_numbers);
   free(final_navbar);
   free(return_page);
+  free(entries_list);
   free(notification_text_return);
 }
 
@@ -1026,7 +1221,7 @@ void route()
 
   while(khttp_fcgi_parse(fcgi, &req) == KCGI_OK && !vert_shutdown)
   {
-    fprintf(stderr, "connection from %s requesting %s\n", req.remote, req.pagename); /* temporary to tell when it hangs */
+    fprintf(stderr, "connection from %s requesting %s [%s]\n", req.remote, req.pagename, req.path); /* temporary to tell when it hangs */
     /* route requests */
     if(strcmp(req.pagename, "") == 0)
       respond_home(&req);
@@ -1042,8 +1237,10 @@ void route()
       respond_user(&req);
     else if(strncmp(req.pagename, "manage", strlen("manage")) == 0)
       respond_manage(&req);
-    else if(strncmp(req.pagename, "entries", strlen("entries")) == 0)
+    else if(strncmp(req.pagename, "entries", strlen("entries")) == 0 && strlen(req.path) == 0)
       respond_entries(&req);
+    else if(strncmp(req.pagename, "entries", strlen("entries")) == 0 && strlen(req.path) != 0)
+      respond_debug(&req);
     else /* last resort if it doesn't find anything */
       respond_debug(&req);
     /* ============= */

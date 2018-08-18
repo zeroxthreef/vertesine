@@ -41,8 +41,6 @@ void vert_clean_inotify(int *fd, int *watch_dir);
 
 char *vert_generate_random_string(unsigned long maxlen);
 
-char *vert_strdup(const char *str);
-
 int vert_manage_pfp(unsigned char *data, char *extension, char *user_id, unsigned long size, char **pfp_loc);
 
 void vert_filter_jansson_breakers(char *string, unsigned long terminated_len);
@@ -56,5 +54,15 @@ int vert_parse_markdown(char *string, char **output);
 char *vert_create_page_list(unsigned int current, unsigned int max, char *query_root);
 
 unsigned long vert_get_db_keyv_num(void *db);
+
+int vert_create_html_dir_with_cgi_index(char *path);
+
+char *vert_replace(char *original, char *find, char *replace);
+
+char *vert_replace_all(char *original, char *find, char *replace);
+
+int vert_replace_buffer_all(char **original, char *find, char *replace);
+
+char *vert_strdup(char *original);
 
 #endif

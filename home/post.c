@@ -15,7 +15,7 @@
 int vert_create_post(unsigned char type, char *title, char *icon, user_t *user)
 {
   unqlite_kv_cursor *cur;
-  char *temp_snowflake = NULL, *key_value, *value_value;
+  char *temp_path = NULL, *key_value, *value_value;
   unqlite_int64 v_size, user_index = 0;
   int k_size;
   json_t *post = NULL;
@@ -52,23 +52,50 @@ int vert_create_post(unsigned char type, char *title, char *icon, user_t *user)
       unqlite_kv_cursor_release(post_db, cur);
       free(key_value);
       free(value_value);
-      return 1;
+      return 2;
     }
 
     unqlite_kv_cursor_next_entry(cur);
 
-    fprintf(stderr, "creating post %s\n", title);
 
-    post = json_object();
-
-    json_object_set_new(user, "username", json_string(username));
 
 
     free(key_value);
     free(value_value);
   }
 
+  fprintf(stderr, "creating post %s\n", title);
+
+  post = json_object();
+
+  json_object_set_new(post, "title", json_string(title));
+  json_object_set_new(post, "image_loc", json_string(""));
+  json_object_set_new(post, "body", json_string(""));
+  json_object_set_new(post, "author_id", json_string(user->id));
+  json_object_set_new(post, "unpublished_body", json_string(""));
+  json_object_set_new(post, "created", json_integer(time(NULL)));
+  json_object_set_new(post, "edited", json_integer(time(NULL)));
+
+
+  if(unqlite_kv_store(post_db, title, -1, json_dumps(post, 0), strlen(json_dumps(post, 0)) + 1) != UNQLITE_OK && json_dumps(post, 0) == NULL)
+  {
+    unqlite_rollback(post_db);
+    unqlite_kv_cursor_release(post_db, cur);
+    fprintf(stderr, "couldn't add a value\n");
+    json_decref(post);
+
+    return 3;
+  }
+
+  vert_asprintf(&temp_path, "entries/%s", title);
+
+  if(vert_create_html_dir_with_cgi_index(temp_path))
+    fprintf(stderr, "entry creation unfinished for [%s]\n");
+
+  free(temp_path);
   unqlite_kv_cursor_release(post_db, cur);
+  json_decref(post);
+  unqlite_commit(post_db);
 
   return 0;
 }

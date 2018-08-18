@@ -20,4 +20,6 @@ int vert_create_post(unsigned char type, char *title, char *icon, user_t *user);
 
 int vert_get_post(char *title, post_t *post);
 
+int vert_edit_post(post_t *post);
+
 #endif

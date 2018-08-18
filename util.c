@@ -14,6 +14,7 @@
 #include <curl/curl.h>
 #include <b64/cencode.h>
 #include <gd.h>
+#include <sys/stat.h>
 
 #define IN_BSIZE (1024 * (sizeof(struct inotify_event) + 16))
 
@@ -178,23 +179,6 @@ char *vert_generate_random_string(unsigned long maxlen)
 
 
   return final;
-}
-
-char *vert_strdup(const char *str)
-{
-  if(str != NULL)
-  {
-    const char *return_str = malloc((strlen(str) + 1) * sizeof(const char));
-    if(return_str != NULL)
-    {
-      strcpy(return_str, str);
-    }
-      return (char *)return_str;
-  }
-  else
-  {
-    return NULL;
-  }
 }
 
 int vert_manage_pfp(unsigned char *data, char *extension, char *user_id, unsigned long size, char **pfp_loc)
@@ -409,6 +393,103 @@ unsigned long vert_get_db_keyv_num(void *db)
 
 
   return count;
+}
+
+int vert_create_html_dir_with_cgi_index(char *path)
+{
+  //HTML_ROOT
+  int ret;
+  char *final = NULL;
+  FILE *f = NULL;
+
+
+  vert_asprintf(&final, "%s%s", HTML_ROOT, path);
+  if((ret = mkdir(final, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)) != 0)
+  {
+    fprintf(stderr, "dir creation error at [%s]\n", final);
+    free(final);
+    return ret;
+  }
+
+  fprintf(stderr, "creating dir at %s\n", final);
+
+  vert_asprintf(&final, "%s/%s", final, "index.cgi");
+  f = fopen(final, "wb");
+
+  if(f != NULL)
+    fclose(f);
+  else
+    fprintf(stderr, "file creation error\n");
+
+  fprintf(stderr, "creating index at %s\n", final);
+
+
+  free(final);
+  return ret;
+}
+
+char *vert_replace(char *original, char *find, char *replace)
+{
+  char *final = NULL, *begining = NULL;
+
+
+  if(original != NULL)
+  if((begining = strstr(original, find)) != NULL)
+  {
+    final = calloc(1, (strlen(original) - strlen(find)) + strlen(replace) + 1);
+
+    memmove(final, original, (begining - original));
+    memmove(final + strlen(final), replace, strlen(replace));
+    memmove(final + strlen(final), original + ((begining - original) + strlen(find)), strlen(original + ((begining - original) + strlen(find))));
+
+    return final;
+  }
+
+  return NULL;
+}
+
+char *vert_replace_all(char *original, char *find, char *replace)
+{
+  char *final = NULL, *last = NULL;
+
+  if(original != NULL)
+  while((final = vert_replace(final ? final : original, find, replace)) != NULL)
+  {
+    if(last != NULL)
+      free(last);
+
+    last = final;
+  }
+
+  return last;
+}
+
+int vert_replace_buffer_all(char **original, char *find, char *replace)
+{
+  char *final = NULL;
+
+
+  if(original != NULL && *original != NULL)
+  if((final = vert_replace_all(*original, find, replace)) != NULL)
+  {
+    free(*original);
+    *original = final;
+
+    return 1;
+  }
+
+  return 0;
+}
+
+char *vert_strdup(char *original)
+{
+  char *duplicate = NULL;
+
+  if(original != NULL)
+    if((duplicate = calloc(strlen(original) + 1, sizeof(char))) != NULL)
+      strcpy(duplicate, original);
+
+  return duplicate;
 }
 
 int vert_send_email(char *address, char *subject, char *email_sender, char *email_message) /* TODO do this later */

@@ -3,6 +3,8 @@
 
 short init();
 
+int replace_normal_vertesine_elements(struct kreq *req, char **buffer);
+
 void respond_debug(struct kreq *req);
 
 void respond_confirmlogout(struct kreq *req);
