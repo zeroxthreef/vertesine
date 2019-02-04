@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<title>[vert_title_real]</title>
+<head>
+<meta name="description" content="Open source projects and software made for fun and utility">
+<meta name="DC.title" content="Vertesine Software">
+<meta charset="UTF-8" />
+<link rel="icon" type="img/ico" href="/favicon.ico">
+<link href="/style.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="/ext/highlight/styles/monokai-sublime.css">
+<script src="/ext/highlight/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+[vert_banner]
+<br>
+[vert_navbar]
+<br>

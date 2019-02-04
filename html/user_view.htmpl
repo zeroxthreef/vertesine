@@ -1,0 +1,42 @@
+[vert_header]
+[vert_basecontainer_begin]
+[vert_seperator]
+<div class="different_content0">
+          <center><img src="[vert_current_user_pfp_path]" alt="usericon"class="profile_page_av"></center>
+          <div class="seperator"></div>
+          <div class="profile_text_container">
+            <div style="text-align: center;">
+              <font size="20pt">[vert_current_user_displayname]</font>
+            </div>
+            <hr class="bigdivide">
+            Permissions: [vert_current_user_permission_draw]
+            <br><br>
+            User since: [vert_current_user_since]
+
+          </div>
+        </div>
+
+        <div class="different_content1">
+          <div class="profile_text_container">
+            <div style="text-align: center;">
+              <font size="20pt">Profile Info</font>
+            </div>
+            <hr class="bigdivide">
+            <div class="seperator"></div>
+	    <div class="smaller_text">
+            [vert_current_user_information]
+	    </div>
+
+            [vert_current_user_edit_button]
+          </div>
+        </div>
+[vert_seperator]
+[vert_basecontainer_end]
+[vert_seperator]
+[vert_basecontainer_begin]
+[vert_seperator]
+	<div id="comments"></div>
+[vert_seperator]
+[vert_basecontainer_end]
+<script src="/comments/vertesine_comments.js"></script>
+[vert_footer]

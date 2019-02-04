@@ -1,0 +1,19 @@
+<a href="/users/[vert_custom_usernamelink]">
+<div class="user_list_user_container">
+<div class="user_list_user_quality_container">
+<img src="[vert_custom_userlist_icon]" class="user_list_user_pfp" />
+</div>
+<div class="user_list_user_quality_container">
+<div class="user_list_balance"></div>
+[vert_custom_userlist_displayname]
+</div>
+<div class="user_list_user_quality_container">
+<div class="user_list_balance"></div>
+[vert_custom_userlist_permissions]
+</div>
+<div class="user_list_user_quality_container">
+<div class="user_list_balance"></div>
+[vert_custom_userlist_id]
+</div>
+</div>
+</a>

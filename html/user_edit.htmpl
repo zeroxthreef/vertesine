@@ -1,0 +1,59 @@
+[vert_header]
+[vert_basecontainer_begin]
+[vert_seperator]
+        <form action="/users/edit/[vert_edit_user_username]" method="post" enctype="multipart/form-data">
+
+        <div class="different_content0">
+          <center><img src="[vert_edit_user_pfp]" alt="usericon"class="profile_page_av"></center>
+          <br>
+          <div class="profile_text_container">
+            Update profile picture(4mb max): <input type="file" name="pic">
+          </div>
+	  <input type="submit" value="UPDATE IMAGE">
+	  </form>
+          <form action="/users/edit/[vert_edit_user_username]" method="post">
+          <div class="seperator"></div>
+          <div class="profile_text_container">
+            <div style="text-align: center;">
+              Edit Display Username(50 chars):
+              <font size="20pt"><input type="text" name="user" value="[vert_edit_user_displayname]"></font>
+            </div>
+            <hr class="bigdivide">
+            <br><br>
+            User since: [vert_edit_user_since]
+
+          </div>
+        </div>
+
+        <div class="different_content1">
+          <div class="profile_text_container">
+            <div style="text-align: center;">
+              <font size="20pt">Profile Info</font>
+            </div>
+            <hr class="bigdivide">
+	    [vert_edit_user_feedback]
+            <div class="seperator"></div>
+            Bio:<br>
+            <textarea name="bio" cols="50" rows="10">[vert_edit_user_bio]</textarea>
+            <div class="seperator_small"></div>
+            Website:
+            <input type="text" name="web" value="[vert_edit_user_website]">
+            <div class="seperator_small"></div>
+            Twitter:
+            <input type="text" name="twi" value="[vert_edit_user_twitter]">
+            <div class="seperator_small"></div>
+            YouTube Channel:
+            <input type="text" name="you" value="[vert_edit_user_channel]">
+            <div class="seperator_small"></div>
+
+            <input type="submit" value="UPDATE">
+        </form>
+<input type="button" onclick="location.href='/users/[vert_edit_user_username]'" value="VIEW" />
+<input type="button" onclick="location.href='/reset'" value="RESET PASSWORD" />
+          </div>
+        </div>
+
+
+[vert_seperator]
+[vert_basecontainer_end]
+[vert_footer]

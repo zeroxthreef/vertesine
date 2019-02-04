@@ -1,0 +1,15 @@
+[vert_header]
+[vert_basecontainer_begin]
+[vert_seperator]
+<div class="container1">
+	<h1>Entry list</h1>
+	<hr></hr>[vert_entries_create]
+	[vert_page_num_nav]
+	[vert_seperator]
+	[vert_entries]
+	[vert_seperator]
+	[vert_page_num_nav]
+</div>
+[vert_seperator]
+[vert_basecontainer_end]
+[vert_footer]

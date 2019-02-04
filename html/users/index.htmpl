@@ -1,0 +1,31 @@
+[vert_header]
+[vert_basecontainer_begin]
+[vert_seperator]
+<div class="container1">
+	<h1>User list</h1>
+	<hr></hr>
+	[vert_page_num_nav]
+	[vert_seperator]
+	<div class="user_list_container">
+		<div class="user_list_user_container_top" href="/users/[vert_custom_usernamelink]">
+			<div class="user_list_user_quality_container">
+				<h2>Users</h2>
+			</div>
+			<div class="user_list_user_quality_container">
+				<h2>Name</h2>
+			</div>
+			<div class="user_list_user_quality_container">
+				<h2>Permissions</h2>
+			</div>
+			<div class="user_list_user_quality_container">
+				<h2>ID</h2>
+			</div>
+		</div>
+		[vert_users]
+	</div>
+	[vert_seperator]
+	[vert_page_num_nav]
+</div>
+[vert_seperator]
+[vert_basecontainer_end]
+[vert_footer]

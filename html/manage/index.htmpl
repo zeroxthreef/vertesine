@@ -1,0 +1,19 @@
+[vert_header]
+[vert_basecontainer_begin]
+[vert_seperator]
+<div class="container1">
+	<h1>Vertesine site management</h1>
+	<hr></hr>
+	<br>
+	<br>
+	<i>with great power comes great responsibility</i>
+	[vert_seperator]
+	[vert_manage_notification]
+	[vert_seperator]
+	[vert_manage_permissions]
+	[vert_seperator]
+	[vert_manage_account_deletion]
+</div>
+[vert_seperator]
+[vert_basecontainer_end]
+[vert_footer]

@@ -1,0 +1,31 @@
+[vert_header]
+[vert_basecontainer_begin]
+[vert_seperator]
+<div class="container1">
+	<h1>Login</h1>
+	<br>
+	<br>
+	Accounts are used to comment on things on this site and some other things. Mostly for commenting because spam management is not fun.
+	<br>
+	<br>
+	NOTE: for the moment, email verification is broken. Accounts will be verified immediately upon creation.
+	<hr></hr>
+	<br>
+	[vert_login_feedback]
+        <form action="/login" method="post">
+            USERNAME<br>
+            <input type="text" name="user">
+            <br>
+            <div class="seperator"></div>
+            PASSWORD<br>
+            <input type="password" name="pass">
+            <div class="seperator"></div>
+            <input type="submit" value="LOGIN">
+          </form>
+          [vert_seperator]
+	  <hr></hr>
+          If you don't have an account, you can <a href="/register"><u>register one here</u></a>
+</div>
+[vert_seperator]
+[vert_basecontainer_end]
+[vert_footer]

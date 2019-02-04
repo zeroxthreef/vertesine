@@ -1,0 +1,12 @@
+[vert_header]
+[vert_basecontainer_begin]
+[vert_seperator]
+<div class="container1">
+	couldn't complete your request: [error]   
+	<hr></hr>
+	<br>
+	<img src="/glass.gif" alt="oof">
+</div>
+[vert_seperator]
+[vert_basecontainer_end]
+[vert_footer]

@@ -1,0 +1,9 @@
+<div class="entries_pages_create">
+	[vert_create_entry_feedback]<br>
+	Make new post<br><br>
+	<form action="/entries" method="post">
+		Title:
+		<input type="text" name="post_title">
+		<input type="submit" value="CREATE">
+	</form>
+</div>

@@ -1,0 +1,9 @@
+<div class="seperator_small"></div>
+<a href="/users/[vert_custom_entrylink]">
+<div class="different_content4">
+<div class="entries_preview_header">[vert_custom_entrylist_title]</div>
+<div class="entries_preview_content">[vert_custom_entrylist_bodypreview]</div>
+<div class="entries_preview_footer">[vert_custom_entrylist_publishdate] Click to read more</div>
+</div>
+</a>
+<div class="seperator_small"></div>

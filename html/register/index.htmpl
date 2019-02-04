@@ -1,0 +1,52 @@
+[vert_header]
+[vert_basecontainer_begin]
+[vert_seperator]
+        <div class="container1">
+	<h1>Register</h1>
+	<br>
+	<br>
+	<hr></hr>
+	<br>
+          [vert_register_feedback]
+          <form action="/register" method="post">
+            EMAIL<br>
+            <input type="text" name="email">
+            <br><br>
+            USERNAME<br>
+            <input type="text" name="user">
+            <br><br>
+            PASSWORD<br>
+            <input type="password" name="pass">
+            <br><br>
+            RETYPE PASSWORD<br>
+            <input type="password" name="passv">
+            <div class="seperator"></div>
+            <input type="submit" value="REGISTER">
+          </form>
+        </div>
+        [vert_seperator]
+        <hr class="smalldivide">
+        <div class="container1">
+          <b>By registering an account, you agree that you are responsible for everything you upload and post including but not limited to:</b>
+          <br><br>
+          * links<br>
+          * comments<br>
+          * account information<br>
+          * account images<br>
+          * any data sent whether an exploit to break my site or regular usage<br>
+	[vert_seperator]
+	  <b>You also agree to:</b><br><br>
+	  * Only upload legal content according to the United States law.<br>
+	  * <b>This website is not liable for any exploits run against it to extract any user profile information.</b><br>
+	  * The only user data stored is data entered here on the register page, register ip (I use this to delete spam accounts), and whatever you enter in "edit user" page. I don't store any tracking crap or whatever modern sites like to do to exploit people for money. this <i>entire</i> site is open source, so if you don't believe me, check the <a href="https://github.com/zeroxthreef/vertesine">Github repo</a><br>
+	<br><br>
+	<i>I only have this wall of text here to protect myself. I don't have the time or money to ensure that this site is bullletproof.</i>
+        </div>
+	[vert_seperator]
+	<hr class="smalldivide">
+	<div class="container1">
+	If you're wondering, passwords are stored as Argon2i hashes, so it is very hard to see what you enter. <b>I would still choose a decently complex password that you don't use anywhere else.</b>
+	</div>
+[vert_seperator]
+[vert_basecontainer_end]
+[vert_footer]

@@ -45,6 +45,12 @@
 *.su
 *.idb
 *.pdb
+*.log
+*.ini
+/html/user_av/*.png
+/html/user_av/*.bmp
+/html/user_av/*.gif
+/html/user_av/*.jpg
 
 # Kernel Module Compile Results
 *.mod*

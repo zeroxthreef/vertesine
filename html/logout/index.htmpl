@@ -1,0 +1,16 @@
+[vert_header]
+[vert_basecontainer_begin]
+[vert_seperator]
+<div class="container1">
+	<h1>Clicking "LOGOUT" will log you out</h1>
+	<hr></hr>
+	[vert_seperator]
+	Confirm you want to log out in case you accidentally pressed the logout button.
+	<br><br>
+          <form action="/confirm_logout" method="post">
+            <input type="submit" value="LOGOUT">&#60;---- that button does the trick
+          </form>
+</div>
+[vert_seperator]
+[vert_basecontainer_end]
+[vert_footer]

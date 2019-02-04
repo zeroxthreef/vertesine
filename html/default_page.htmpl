@@ -1,0 +1,10 @@
+[vert_header]
+[vert_basecontainer_begin]
+[vert_seperator]
+<div class="container1">
+	[vert_page_content]
+</div>
+[vert_seperator]
+[vert_basecontainer_end]
+[vert_page_markup_editor]
+[vert_footer]

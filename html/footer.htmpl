@@ -1,0 +1,22 @@
+</body>
+  <br>
+  <div class="seperator">
+  </div>
+  <footer>
+    <div class="container0">
+      <br>
+      <div class = "cooltext">
+        <br>
+        <div class="container1">
+		Copyright 2017-[vert_year] 0x3F
+		<br>
+	        Page generated in [template_millis]
+        </div>
+        <br>
+        <br>
+      </div>
+    </div>
+    <div class="seperator">
+    </div>
+  </footer>
+</html>

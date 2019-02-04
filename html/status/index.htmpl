@@ -1,0 +1,23 @@
+[vert_header]
+[vert_basecontainer_begin]
+[vert_seperator]
+<div class="container1">
+	<h1>status</h1>
+	<hr></hr>
+	<br><br>
+	<h2>tags</h2>
+	[template_table]
+	<br>
+	<h2>in-use settings</h2>
+	[server_settings]
+	<br>
+	<h2>redis db status</h2>
+	[vert_redis_status]
+	<br>
+	<h2>last [server_event_max] events</h2>
+	[server_events]
+</div>
+[vert_seperator]
+[vert_basecontainer_end]
+[vert_footer]
+

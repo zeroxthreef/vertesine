@@ -1,0 +1,10 @@
+[vert_header]
+[vert_basecontainer_begin]
+[vert_seperator]
+<div class="container1">
+	<h1>Logging out...</h1>
+	[vert_logout]
+</div>
+[vert_seperator]
+[vert_basecontainer_end]
+[vert_footer]
