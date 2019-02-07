@@ -4,7 +4,9 @@ All files for the vertesine web backend and frontend. Vertesine is my personal w
 
 It has a templating system that I plan on reusing for more of my web projects so this is also where i'd reuse the system.
 
-This is not finished whatsoever. I still have to credit libraries and people I took code from (especially for snowflake generation). All coming soon. This is just a quick push.
+## Status
+
+This backend is not live. The in-use backend is a separate project at this time that will be replaced when this is ready.
 
 ## Building
 
@@ -24,6 +26,16 @@ make -j4
 * libb64
 * hiredis
 * discount(https://www.pell.portland.or.us/~orc/Code/discount/)
+
+## Using
+
+* highlight.js (generated)
+* snowflaked
+* rxi's vec
+* rxi's map
+* rxi's ini
+* rxi's log.c
+* rxi's snowbird
 
 ## TODO
 
