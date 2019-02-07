@@ -1630,7 +1630,10 @@ static char *custom_tag_manage_deletion(char *key, sb_Event *e)
 						
 						/* remove the key now */
 						
+						/* remove filesystem resources */
 						id = strtoll(temp_str, NULL, 10);
+						
+						vert_custom_delete_usericon(temp_str);
 						
 						temp1_str = vert_custom_generate_db_key(id, VERT_CUSTOM_OBJECT_USER);
 						
@@ -1650,6 +1653,7 @@ static char *custom_tag_manage_deletion(char *key, sb_Event *e)
 						temp1_str = vert_custom_generate_db_key(id, VERT_CUSTOM_OBJECT_UTOKEN);
 						
 						reply = redisCommand(vert_redis_ctx,"DEL %s", temp1_str);
+						
 						
 						vert_util_safe_free(temp1_str);
 					}

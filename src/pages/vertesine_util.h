@@ -84,4 +84,6 @@ char *vert_custom_determine_extension(uint8_t *data, size_t data_len);
 
 char *vert_custom_generate_pagenum_nav(char *path, size_t current, size_t maximum);
 
+int vert_custom_delete_usericon(char *userid);
+
 #endif

@@ -450,6 +450,12 @@ int vert_custom_manage_pfp(uint8_t *data, char *extension, char *user_id, unsign
 		if(pfp == NULL)
 			return 1;
 		
+		if(vert_custom_delete_usericon(user_id))
+		{
+			log_error("unable to delete old file");
+			return 1;
+		}
+		
 		/* write it to disk */
 		if((write = fopen(writepath, "wb")) == NULL)
 		{
@@ -471,6 +477,12 @@ int vert_custom_manage_pfp(uint8_t *data, char *extension, char *user_id, unsign
 		pfp = gdImageCreateFromJpegPtr((int)size, data);
 		if(pfp == NULL)
 		return 1;
+		
+		if(vert_custom_delete_usericon(user_id))
+		{
+			log_error("unable to delete old file");
+			return 1;
+		}
 		
 		/* write it to disk */
 		if((write = fopen(writepath, "wb")) == NULL)
@@ -494,6 +506,12 @@ int vert_custom_manage_pfp(uint8_t *data, char *extension, char *user_id, unsign
 		if(pfp == NULL)
 		return 1;
 		
+		if(vert_custom_delete_usericon(user_id))
+		{
+			log_error("unable to delete old file");
+			return 1;
+		}
+		
 		/* write it to disk */
 		if((write = fopen(writepath, "wb")) == NULL)
 		{
@@ -516,6 +534,12 @@ int vert_custom_manage_pfp(uint8_t *data, char *extension, char *user_id, unsign
 		pfp = gdImageCreateFromBmpPtr((int)size, data);
 		if(pfp == NULL)
 			return 1;
+		
+		if(vert_custom_delete_usericon(user_id))
+		{
+			log_error("unable to delete old file");
+			return 1;
+		}
 		
 		/* write it to disk */
 		if((write = fopen(writepath, "wb")) == NULL)
@@ -589,6 +613,32 @@ char *vert_custom_generate_pagenum_nav(char *path, size_t current, size_t maximu
 	 */
 	
 	return temp_str;
+}
+
+int vert_custom_delete_usericon(char *userid)
+{
+	char *filename = NULL, *final_file = NULL;
+	int ret;
+	
+	
+	filename = vert_custom_get_id_user_field(userid, "pfp");
+	
+	if(strncmp(filename, "/default_usericons", strlen("/default_usericons")) != 0)
+	{
+		log_info("deleting user %s's pfp", userid);
+		
+		if(filename)
+		{
+			vert_util_asprintf(&final_file, "html%s", filename);
+			
+			ret = remove(final_file);
+		}
+	}
+	
+	vert_util_safe_free(filename);
+	vert_util_safe_free(final_file);
+	
+	return ret;
 }
 
 size_t vert_custom_get_entrycount_for_user(sb_Event *e)
