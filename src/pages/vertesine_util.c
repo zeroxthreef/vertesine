@@ -618,7 +618,7 @@ char *vert_custom_generate_pagenum_nav(char *path, size_t current, size_t maximu
 int vert_custom_delete_usericon(char *userid)
 {
 	char *filename = NULL, *final_file = NULL;
-	int ret;
+	int ret = 0;
 	
 	
 	filename = vert_custom_get_id_user_field(userid, "pfp");
@@ -641,7 +641,82 @@ int vert_custom_delete_usericon(char *userid)
 	return ret;
 }
 
-size_t vert_custom_get_entrycount_for_user(sb_Event *e)
+char *vert_custom_get_id_generic_field(char *id, int type, char *field) /* only for hash keys */
 {
+	char *reply_str = NULL, *temp_str;
+	redisReply *reply;
 	
+	
+	temp_str = vert_custom_generate_db_key(strtol(id, NULL, 10), type);
+	
+	reply = redisCommand(vert_redis_ctx,"HGET %s %s", temp_str, field);
+	if(reply)
+	{
+		/* finally, compare the cookie */
+		if(reply->type != REDIS_REPLY_ERROR)
+			reply_str = vert_util_strdup(reply->str);
+		
+		
+		freeReplyObject(reply);
+	}
+	
+	
+	vert_util_safe_free(temp_str);
+	
+	return reply_str;
+}
+
+char *vert_custom_get_entryname_field(char *entry_title, char *field) /* TODO resolve spaces/hyphens? */
+{
+	char *reply_str = NULL, *temp_str;
+	redisReply *reply;
+	int i;
+	
+	/* TODO loop through the list of entries and if it exists, hget the user field */
+	reply = redisCommand(vert_redis_ctx, "LRANGE vertesine:variable:entries 0 -1");
+	if(reply)
+	{
+		if(reply->type == REDIS_REPLY_ARRAY)
+			for(i = 0; i < reply->elements; i++)
+			{
+				/* data is stored as "id:entry_title" */
+				temp_str = strchr(reply->element[i]->str, ':');
+				temp_str++;
+				if(strcmp(temp_str, entry_title) == 0)
+				{
+					/* found user */
+					temp_str--;
+					*temp_str = 0x00;
+					
+					reply_str = vert_custom_get_id_user_field(reply->element[i]->str, field);
+					
+					break;
+				}
+			}
+			
+			freeReplyObject(reply);
+	}
+	
+	
+	
+	return reply_str;
+}
+
+int vert_contains_perm(uint32_t permissions, int one_indexed_bit)
+{
+	uint32_t want_mask = 1UL;
+	
+	if((permissions >> (one_indexed_bit == 0 ? 0 : one_indexed_bit - 1)) & want_mask)
+		return 1;
+	return 0;
+}
+
+char *vert_custom_title_to_urlfriendly(char *title)
+{
+	return NULL;
+}
+
+char *vert_custom_urlfriendly_to_title(char *title)
+{
+	return NULL;
 }

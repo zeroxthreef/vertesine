@@ -18,6 +18,7 @@
       <File Name="src/pages/vertesine_util.h"/>
       <File Name="src/pages/vertesine_custom_templates.c"/>
       <File Name="src/pages/vertesine_custom_templates.h"/>
+      <File Name="src/pages/tests.h"/>
     </VirtualDirectory>
     <File Name="src/templating.c"/>
     <File Name="src/templating.h"/>

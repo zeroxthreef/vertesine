@@ -86,4 +86,10 @@ char *vert_custom_generate_pagenum_nav(char *path, size_t current, size_t maximu
 
 int vert_custom_delete_usericon(char *userid);
 
+char *vert_custom_get_id_generic_field(char *id, int type, char *field); /* only for hash keys */
+
+char *vert_custom_get_entryname_field(char *entry_title, char *field);
+
+int vert_contains_perm(uint32_t permissions, int one_indexed_bit);
+
 #endif

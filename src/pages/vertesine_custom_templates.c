@@ -4,6 +4,8 @@
 #include "../templating.h"
 #include "vertesine_util.h"
 
+#include "tests.h"
+
 #include <mkdio.h>
 #include <sodium.h>
 
@@ -1857,10 +1859,11 @@ static char *custom_tag_user_pagenums_entries(char *key, sb_Event *e)
 	BLOCKEDFROMREADINGPOSTS, or when there is no user logged in */
 	
 	
-	reply = redisCommand(vert_redis_ctx, "LLEN vertesine:variable:entries");
+	reply = redisCommand(vert_redis_ctx, "LRANGE vertesine:variable:entries 0 -1");
 	
 	if(reply->type == REDIS_REPLY_INTEGER)
 	{
+		
 		max_elements = reply->integer;
 	}
 	else
@@ -2029,4 +2032,8 @@ void vert_custom_templ_add()
 	vert_templ_add("[vert_create_entry_feedback]", &custom_tag_entry_feedback);
 	vert_templ_add("[vert_entries]", &custom_tag_entry_list);
 	vert_templ_add("[vert_custom_pagenums_entries]", &custom_tag_user_pagenums_entries);
+	
+	/* add the tests */
+	log_info("adding the custom test tags");
+	vert_add_tests();
 }
