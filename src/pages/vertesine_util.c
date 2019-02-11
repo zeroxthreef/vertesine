@@ -711,6 +711,34 @@ int vert_contains_perm(uint32_t permissions, int one_indexed_bit)
 	return 0;
 }
 
+char *vert_extract_list_elem(char *list_elem, int index)
+{
+	char *return_str = NULL, *temp_tok_str = NULL, *tok_ptr = NULL;
+	int i = 0;
+	
+	if(temp_tok_str = vert_util_strdup(list_elem))
+	{
+		tok_ptr = strtok(temp_tok_str, ":");
+		
+		while(tok_ptr)
+		{
+			
+			if(i == index)
+				return_str = vert_util_strdup(tok_ptr);
+			
+			/* =========== */
+			i++;
+			tok_ptr = strtok(NULL, ":");
+		}
+		
+		vert_util_safe_free(temp_tok_str);
+		
+		return return_str;
+	}
+	
+	return NULL;
+}
+
 char *vert_custom_title_to_urlfriendly(char *title)
 {
 	return NULL;

@@ -92,4 +92,6 @@ char *vert_custom_get_entryname_field(char *entry_title, char *field);
 
 int vert_contains_perm(uint32_t permissions, int one_indexed_bit);
 
+char *vert_extract_list_elem(char *list_elem, int index);
+
 #endif

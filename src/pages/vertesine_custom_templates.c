@@ -1849,8 +1849,9 @@ static char *custom_tag_entry_feedback(char *key, sb_Event *e)
 
 static char *custom_tag_user_pagenums_entries(char *key, sb_Event *e)
 {
-	char *temp_str = NULL, number[64] = {0};
-	size_t current = 1, max_elements;
+	char *temp_str = NULL, number[64] = {0}, *temp_str1 = NULL;
+	size_t current = 1, max_elements, i;
+	uint32_t entry_permissions = 0;
 	redisReply *reply;
 	
 	/* TODO check if an admin is browsing the page and display everything anyway. Show unpublished and per permission to other users aswell */
@@ -1861,8 +1862,21 @@ static char *custom_tag_user_pagenums_entries(char *key, sb_Event *e)
 	
 	reply = redisCommand(vert_redis_ctx, "LRANGE vertesine:variable:entries 0 -1");
 	
-	if(reply->type == REDIS_REPLY_INTEGER)
+	if(reply->type == REDIS_REPLY_ARRAY)
 	{
+		/* loop through all of the entries and count ones that the current user is allowed to see */
+		for(i = 0; i < reply->elements; i++)
+		{
+			temp_str = vert_extract_list_elem(reply->element[i]->str, 0);
+			
+			temp_str1 = vert_custom_get_id_generic_field(temp_str, VERT_CUSTOM_OBJECT_ENTRY, "viewable_permissions");
+			entry_permissions = strtoll(temp_str1, NULL, 10);
+			vert_util_safe_free(temp_str1);
+			
+			/* TODO test if the user has permission to view this */
+			
+			vert_util_safe_free(temp_str);
+		}
 		
 		max_elements = reply->integer;
 	}
