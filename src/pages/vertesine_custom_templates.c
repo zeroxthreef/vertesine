@@ -1849,9 +1849,10 @@ static char *custom_tag_entry_feedback(char *key, sb_Event *e)
 
 static char *custom_tag_user_pagenums_entries(char *key, sb_Event *e)
 {
-	char *temp_str = NULL, number[64] = {0}, *temp_str1 = NULL;
-	size_t current = 1, max_elements, i;
-	uint32_t entry_permissions = 0;
+	char *temp_str = NULL, number[64] = {0}, *temp_str1 = NULL, *id_str = NULL, *permission_str = NULL;
+	size_t current = 1, max_elements = 1, i;
+	uint32_t entry_permissions = 0, permission_got = 0;
+	uint64_t id, publishdate;
 	redisReply *reply;
 	
 	/* TODO check if an admin is browsing the page and display everything anyway. Show unpublished and per permission to other users aswell */
@@ -1859,6 +1860,21 @@ static char *custom_tag_user_pagenums_entries(char *key, sb_Event *e)
 	/* permissionwise, the only time that the visibility is affected is when an entry is unpublished, user is set to
 	BLOCKEDFROMREADINGPOSTS, or when there is no user logged in */
 	
+	
+	
+	if((id = vert_custom_logged_in(e)))
+	{
+		vert_util_asprintf(&id_str, "%llu", id);
+		
+		permission_str = vert_custom_get_id_user_field(id_str, "permissions");
+		
+		vert_util_safe_free(id_str);
+		
+		permission_got = strtol(permission_str, NULL, 10);
+		
+		vert_util_safe_free(permission_str);
+		
+	}
 	
 	reply = redisCommand(vert_redis_ctx, "LRANGE vertesine:variable:entries 0 -1");
 	
@@ -1873,12 +1889,29 @@ static char *custom_tag_user_pagenums_entries(char *key, sb_Event *e)
 			entry_permissions = strtoll(temp_str1, NULL, 10);
 			vert_util_safe_free(temp_str1);
 			
+			temp_str1 = vert_custom_get_id_generic_field(temp_str, VERT_CUSTOM_OBJECT_ENTRY, "publishdate");
+			publishdate = strtoll(temp_str1, NULL, 10);
+			vert_util_safe_free(temp_str1);
+			
 			/* TODO test if the user has permission to view this */
+			
+			if(vert_contains_perm(permission_got, 31) || vert_contains_perm(permission_got, 32)) /* test if an admin is logged in and can see it */
+			{
+				max_elements++;
+			}
+			else if(vert_contains_perm(entry_permissions, 4) && id && !vert_contains_perm(permission_got, 1) && publishdate) /* test if its a user post, published, and the user isnt blocked from reading these */
+			{
+				max_elements++;
+			}
+			else if(publishdate && !vert_contains_perm(permission_got, 1)) /* test if the entry is published and not blocked from reading posts */
+			{
+				max_elements++;
+			}
 			
 			vert_util_safe_free(temp_str);
 		}
 		
-		max_elements = reply->integer;
+		/* max_elements = reply->elements; */
 	}
 	else
 		max_elements = 1;
