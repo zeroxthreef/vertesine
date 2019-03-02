@@ -94,4 +94,8 @@ int vert_contains_perm(uint32_t permissions, int one_indexed_bit);
 
 char *vert_extract_list_elem(char *list_elem, int index);
 
+size_t vert_get_entry_count(sb_Event *e);
+
+int vert_can_view_entry(char *id_entry, sb_Event *e);
+
 #endif

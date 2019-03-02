@@ -74,8 +74,8 @@ int vert_init(sb_Server **server, sb_Options options)
 	ini_sget(config, "vertesine", "log_path", NULL, &temp_s);
 	
 	/* setup logging */
-	log_file = fopen(temp_s, "a");
-	log_set_fp(log_file);
+	//log_file = fopen(temp_s, "a");
+	//log_set_fp(log_file);
 	
 	/* vert_util_safe_free(temp_s); */
 	temp_s = NULL;

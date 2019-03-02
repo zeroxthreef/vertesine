@@ -1,5 +1,5 @@
 <div class="seperator_small"></div>
-<a href="/users/[vert_custom_entrylink]">
+<a href="/entries/[vert_custom_entrylink]">
 <div class="different_content4">
 <div class="entries_preview_header">[vert_custom_entrylist_title]</div>
 <div class="entries_preview_content">[vert_custom_entrylist_bodypreview]</div>

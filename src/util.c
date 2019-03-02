@@ -243,7 +243,9 @@ char *vert_util_replace(char *original, char *find, char *replace)
 {
 	char *final = NULL, *begining = NULL;
 
-
+	if(!replace)
+		replace = "template replace error";
+	
 	if(original != NULL)
 	if((begining = strstr(original, find)) != NULL)
 	{

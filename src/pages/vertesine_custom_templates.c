@@ -1849,74 +1849,12 @@ static char *custom_tag_entry_feedback(char *key, sb_Event *e)
 
 static char *custom_tag_user_pagenums_entries(char *key, sb_Event *e)
 {
-	char *temp_str = NULL, number[64] = {0}, *temp_str1 = NULL, *id_str = NULL, *permission_str = NULL;
-	size_t current = 1, max_elements = 1, i;
-	uint32_t entry_permissions = 0, permission_got = 0;
-	uint64_t id, publishdate;
-	redisReply *reply;
-	
-	/* TODO check if an admin is browsing the page and display everything anyway. Show unpublished and per permission to other users aswell */
-	
-	/* permissionwise, the only time that the visibility is affected is when an entry is unpublished, user is set to
-	BLOCKEDFROMREADINGPOSTS, or when there is no user logged in */
+	char *temp_str = NULL, number[64] = {0};
+	size_t current = 1, max_elements = 1;
 	
 	
-	
-	if((id = vert_custom_logged_in(e)))
-	{
-		vert_util_asprintf(&id_str, "%llu", id);
-		
-		permission_str = vert_custom_get_id_user_field(id_str, "permissions");
-		
-		vert_util_safe_free(id_str);
-		
-		permission_got = strtol(permission_str, NULL, 10);
-		
-		vert_util_safe_free(permission_str);
-		
-	}
-	
-	reply = redisCommand(vert_redis_ctx, "LRANGE vertesine:variable:entries 0 -1");
-	
-	if(reply->type == REDIS_REPLY_ARRAY)
-	{
-		/* loop through all of the entries and count ones that the current user is allowed to see */
-		for(i = 0; i < reply->elements; i++)
-		{
-			temp_str = vert_extract_list_elem(reply->element[i]->str, 0);
-			
-			temp_str1 = vert_custom_get_id_generic_field(temp_str, VERT_CUSTOM_OBJECT_ENTRY, "viewable_permissions");
-			entry_permissions = strtoll(temp_str1, NULL, 10);
-			vert_util_safe_free(temp_str1);
-			
-			temp_str1 = vert_custom_get_id_generic_field(temp_str, VERT_CUSTOM_OBJECT_ENTRY, "publishdate");
-			publishdate = strtoll(temp_str1, NULL, 10);
-			vert_util_safe_free(temp_str1);
-			
-			/* TODO test if the user has permission to view this */
-			
-			if(vert_contains_perm(permission_got, 31) || vert_contains_perm(permission_got, 32)) /* test if an admin is logged in and can see it */
-			{
-				max_elements++;
-			}
-			else if(vert_contains_perm(entry_permissions, 4) && id && !vert_contains_perm(permission_got, 1) && publishdate) /* test if its a user post, published, and the user isnt blocked from reading these */
-			{
-				max_elements++;
-			}
-			else if(publishdate && !vert_contains_perm(permission_got, 1)) /* test if the entry is published and not blocked from reading posts */
-			{
-				max_elements++;
-			}
-			
-			vert_util_safe_free(temp_str);
-		}
-		
-		/* max_elements = reply->elements; */
-	}
-	else
+	if(!(max_elements = vert_get_entry_count(e)))
 		max_elements = 1;
-	
-	freeReplyObject(reply);
 	
 	
 	if(sb_get_var(e->stream, "p", number, sizeof(number)) != SB_ENOTFOUND)
@@ -1945,11 +1883,11 @@ static char *custom_tag_entry_list(char *key, sb_Event *e)
 	
 	if(!(template_str = vert_filecache_read("html/entry_list_data.htmpl", &size, VERT_CACHE_TEXT)))
 	{
-		log_error("could not find the necessary template file for the user list template");
-		return vert_util_strdup("template error in user list");
+		log_error("could not find the necessary template file for the entry list template");
+		return vert_util_strdup("template error in entry list");
 	}
 	
-	reply = redisCommand(vert_redis_ctx,"LRANGE vertesine:variable:users 0 -1");
+	reply = redisCommand(vert_redis_ctx,"LRANGE vertesine:variable:entries 0 -1");
 	
 	
 	if(sb_get_var(e->stream, "p", number, sizeof(number)) != SB_ENOTFOUND)
@@ -1960,11 +1898,11 @@ static char *custom_tag_entry_list(char *key, sb_Event *e)
 		
 		if(strtoll(number, NULL, 10) == 0) /* TODO fix 0 index problem  */
 			current = 0;
-		else if(current > reply->elements) /* just show the first page. Could just show a blank page but this will only happen if  someone is explicitly trying to go over the limit */
+		else if(current > vert_get_entry_count(e)) /* just show the first page. Could just show a blank page but this will only happen if  someone is explicitly trying to go over the limit */
 			current = 0;
 		
-		if(max_elements > reply->elements)
-			max_elements = reply->elements;
+		if(max_elements > vert_get_entry_count(e))
+			max_elements = vert_get_entry_count(e);
 		
 	}
 	else
@@ -1973,8 +1911,8 @@ static char *custom_tag_entry_list(char *key, sb_Event *e)
 		
 		max_elements = current + *map_get(&vert_settings, "elem_per_page");
 		
-		if(max_elements > reply->elements)
-			max_elements = reply->elements;
+		if(max_elements > vert_get_entry_count(e))
+			max_elements = vert_get_entry_count(e);
 	}
 	
 	
@@ -1985,23 +1923,29 @@ static char *custom_tag_entry_list(char *key, sb_Event *e)
 		
 		for(i = current; i < max_elements; i++)
 		{
-			vert_util_replace_buffer_all(&reply_str, "[vert_custom_usernamelink]", strchr(reply->element[i]->str, ':') + 1);
+			/* TODO: fix this. The corrected title url needs to be used */
+			vert_util_replace_buffer_all(&reply_str, "[vert_custom_entrylink]", strchr(reply->element[i]->str, ':') + 1);
 			
 			temp_str = strchr(reply->element[i]->str, ':');
 			*temp_str = 0x00;
 			
-			temp0_str = vert_custom_get_id_user_field(reply->element[i]->str, "pfp");
-			vert_util_replace_buffer_all(&reply_str, "[vert_custom_userlist_icon]", temp0_str);
+			
+			/* check if the user can see the entry, and if they cant, skip over it */
+			if(!vert_can_view_entry(reply->element[i]->str, e))
+				continue;
+			
+			temp0_str = vert_custom_get_id_generic_field(reply->element[i]->str, VERT_CUSTOM_OBJECT_ENTRY, "title");
+			vert_util_replace_buffer_all(&reply_str, "[vert_custom_entrylist_title]", temp0_str);
 			vert_util_safe_free(temp0_str);
 			
-			temp0_str = vert_custom_get_id_user_field(reply->element[i]->str, "displayname");
-			vert_util_replace_buffer_all(&reply_str, "[vert_custom_userlist_displayname]", temp0_str);
+			temp0_str = vert_custom_get_id_user_field(reply->element[i]->str, "publishdate"); /* TODO print out the time string */
+			vert_util_replace_buffer_all(&reply_str, "[vert_custom_entrylist_publishdate]", temp0_str);
 			vert_util_safe_free(temp0_str);
 			
-			vert_util_replace_buffer_all(&reply_str, "[vert_custom_userlist_permissions]", "display permissions TODO");
+			vert_util_replace_buffer_all(&reply_str, "[vert_custom_entrylist_bodypreview]", "TODO parse the markdown but restricted to a few characters & no images");
 			
-			vert_util_replace_buffer_all(&reply_str, "[vert_custom_userlist_id]", reply->element[i]->str);
 			
+			/* Need to check and see if this will break if the last element is unreadable for the user */
 			if(i + 1 < max_elements) /* used to be the elements */
 				vert_util_asprintf(&reply_str, "%s%s", reply_str, template_str);
 			else
@@ -2012,7 +1956,7 @@ static char *custom_tag_entry_list(char *key, sb_Event *e)
 	freeReplyObject(reply);
 	
 	if(!reply_str)
-		reply_str = vert_util_strdup(""); /* used to be ERROR */
+		reply_str = vert_util_strdup("No entries here"); /* used to be ERROR */
 		
 	vert_util_safe_free(template_str);
 	

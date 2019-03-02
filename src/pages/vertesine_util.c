@@ -739,6 +739,127 @@ char *vert_extract_list_elem(char *list_elem, int index)
 	return NULL;
 }
 
+size_t vert_get_entry_count(sb_Event *e)
+{
+	char *temp_str = NULL, *temp_str1 = NULL, *id_str = NULL, *permission_str = NULL;
+	size_t max_elements = 0, i;
+	uint32_t entry_permissions = 0, permission_got = 0;
+	uint64_t id, publishdate;
+	redisReply *reply;
+	
+	/* TODO check if an admin is browsing the page and display everything anyway. Show unpublished and per permission to other users aswell */
+	
+	/* permissionwise, the only time that the visibility is affected is when an entry is unpublished, user is set to
+	BLOCKEDFROMREADINGPOSTS, or when there is no user logged in */
+	
+	
+	if((id = vert_custom_logged_in(e)))
+	{
+		vert_util_asprintf(&id_str, "%llu", id);
+		
+		permission_str = vert_custom_get_id_user_field(id_str, "permissions");
+		
+		vert_util_safe_free(id_str);
+		
+		permission_got = strtol(permission_str, NULL, 10);
+		
+		vert_util_safe_free(permission_str);
+		
+	}
+	
+	reply = redisCommand(vert_redis_ctx, "LRANGE vertesine:variable:entries 0 -1");
+	
+	if(reply->type == REDIS_REPLY_ARRAY)
+	{
+		/* loop through all of the entries and count ones that the current user is allowed to see */
+		for(i = 0; i < reply->elements; i++)
+		{
+			temp_str = vert_extract_list_elem(reply->element[i]->str, 0);
+			
+			temp_str1 = vert_custom_get_id_generic_field(temp_str, VERT_CUSTOM_OBJECT_ENTRY, "viewable_permissions");
+			entry_permissions = strtoll(temp_str1, NULL, 10);
+			vert_util_safe_free(temp_str1);
+			
+			temp_str1 = vert_custom_get_id_generic_field(temp_str, VERT_CUSTOM_OBJECT_ENTRY, "publishdate");
+			publishdate = strtoll(temp_str1, NULL, 10);
+			vert_util_safe_free(temp_str1);
+			
+			/* TODO test if the user has permission to view this */
+			
+			if(vert_contains_perm(permission_got, 31) || vert_contains_perm(permission_got, 32)) /* test if an admin is logged in and can see it */
+			{
+				max_elements++;
+			}
+			else if(vert_contains_perm(entry_permissions, 4) && id && !vert_contains_perm(permission_got, 1) && publishdate) /* test if its a user post, published, and the user isnt blocked from reading these */
+			{
+				max_elements++;
+			}
+			else if(publishdate && !vert_contains_perm(permission_got, 1)) /* test if the entry is published and not blocked from reading posts */
+			{
+				max_elements++;
+			}
+			
+			vert_util_safe_free(temp_str);
+		}
+		
+		/* max_elements = reply->elements; */
+	}
+	
+	freeReplyObject(reply);
+	
+	return max_elements;
+}
+
+int vert_can_view_entry(char *id_entry, sb_Event *e)
+{
+	char *temp_str = NULL, *temp_str1 = NULL, *id_str = NULL, *permission_str = NULL;
+	uint32_t entry_permissions = 0, permission_got = 0;
+	uint64_t id, publishdate;
+	
+	/* TODO check if an admin is browsing the page and display everything anyway. Show unpublished and per permission to other users aswell */
+	
+	/* permissionwise, the only time that the visibility is affected is when an entry is unpublished, user is set to
+	BLOCKEDFROMREADINGPOSTS, or when there is no user logged in */
+	
+	
+	if((id = vert_custom_logged_in(e)))
+	{
+		vert_util_asprintf(&id_str, "%llu", id);
+		
+		permission_str = vert_custom_get_id_user_field(id_str, "permissions");
+		
+		vert_util_safe_free(id_str);
+		
+		permission_got = strtol(permission_str, NULL, 10);
+		
+		vert_util_safe_free(permission_str);
+		
+	}
+	
+	temp_str1 = vert_custom_get_id_generic_field(id_entry, VERT_CUSTOM_OBJECT_ENTRY, "viewable_permissions");
+	entry_permissions = strtoll(temp_str1, NULL, 10);
+	vert_util_safe_free(temp_str1);
+	
+	temp_str1 = vert_custom_get_id_generic_field(id_entry, VERT_CUSTOM_OBJECT_ENTRY, "publishdate");
+	publishdate = strtoll(temp_str1, NULL, 10);
+	vert_util_safe_free(temp_str1);
+	
+	if(vert_contains_perm(permission_got, 31) || vert_contains_perm(permission_got, 32)) /* test if an admin is logged in and can see it */
+	{
+		return 1;
+	}
+	else if(vert_contains_perm(entry_permissions, 4) && id && !vert_contains_perm(permission_got, 1) && publishdate) /* test if its a user post, published, and the user isnt blocked from reading these */
+	{
+		return 1;
+	}
+	else if(publishdate && !vert_contains_perm(permission_got, 1)) /* test if the entry is published and not blocked from reading posts */
+	{
+		return 1;
+	}
+	
+	return 0;
+}
+
 char *vert_custom_title_to_urlfriendly(char *title)
 {
 	return NULL;
